@@ -1,0 +1,43 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.lixxzy.lite'
+    compileSdk 34
+    
+    defaultConfig {
+        applicationId "com.lixxzy.lite"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+    
+    signingConfigs {
+        release {
+            storeFile rootProject.file(System.getenv("KEYSTORE_PATH") ?: "release.keystore")
+            storePassword System.getenv("KEYSTORE_PASS") ?: "changeme"
+            keyAlias System.getenv("KEY_ALIAS") ?: "lixxzy"
+            keyPassword System.getenv("KEY_PASS") ?: "changeme"
+        }
+    }
+    
+    buildTypes {
+        release { 
+            minifyEnabled false
+            signingConfig signingConfigs.release 
+        }
+    }
+    
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    
+    aaptOptions {
+        noCompress "dat", "bundle", "unity3d", "assets"
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
