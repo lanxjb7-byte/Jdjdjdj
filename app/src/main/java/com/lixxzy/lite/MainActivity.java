@@ -21,11 +21,11 @@ import java.io.OutputStream;
 
 public class MainActivity extends AppCompatActivity {
     
-    // Path folder tujuan di dalam Free Fire
+    // PATH KHUSUS FREE FIRE TH (BIASA)
     private final String TARGET_DIR = Environment.getExternalStorageDirectory().getAbsolutePath() + 
             "/Android/data/com.dts.freefireth/files/contentcache/Optional/android/gameassetbundles/";
             
-    // Nama folder di dalam APK lo
+    // NAMA FOLDER ASET DI DALAM APK (Sesuai yang lo bilang: gameassetbundles)
     private final String ASSET_FOLDER = "gameassetbundles";
 
     private Switch switchMod;
@@ -34,11 +34,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main); // Panggil UI XML tadi
+        setContentView(R.layout.activity_main);
 
         switchMod = findViewById(R.id.switchMod);
-        Button btnFF = findViewById(R.id.btnFF);
-        Button btnFFMax = findViewById(R.id.btnFFMax);
+        Button btnFF = findViewById(R.id.btnFF); // Cuma ada tombol FF TH
 
         // Minta izin All Files Access (Android 11+)
         mintaIzin();
@@ -47,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         switchMod.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isModActive = isChecked;
             if (isChecked) {
-                switchMod.setText("STATUS: ON");
+                switchMod.setText("STATUS: ON (Siap Inject)");
                 switchMod.setTextColor(0xFF00FFCC); // Cyan
             } else {
                 switchMod.setText("STATUS: OFF");
@@ -56,22 +55,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Tombol FF Biasa
+        // Tombol START FF TH
         btnFF.setOnClickListener(v -> {
             if (!isModActive) {
                 Toast.makeText(this, "Aktifkan Switch ON dulu!", Toast.LENGTH_SHORT).show();
                 return;
             }
-            injectFiles("FreeFire TH", "com.dts.freefireth");
-        });
-
-        // Tombol FF MAX
-        btnFFMax.setOnClickListener(v -> {
-            if (!isModActive) {
-                Toast.makeText(this, "Aktifkan Switch ON dulu!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            injectFiles("FreeFire MAX", "com.dts.freefiremax");
+            injectFiles();
         });
     }
 
@@ -89,10 +79,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void injectFiles(String mode, String packageName) {
-        Toast.makeText(this, "Loading Lixxzy Lite...", Toast.LENGTH_SHORT).show();
+    private void injectFiles() {
+        Toast.makeText(this, "Mengekstrak file mod...", Toast.LENGTH_SHORT).show();
         
-        // Pindah ke background thread biar UI gak freeze
         new Thread(() -> {
             try {
                 File dir = new File(TARGET_DIR);
@@ -100,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String[] files = getAssets().list(ASSET_FOLDER);
                 if (files == null || files.length == 0) {
-                    runOnUiThread(() -> Toast.makeText(this, "File di dalam APK kosong!", Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(this, "File di folder " + ASSET_FOLDER + " kosong!", Toast.LENGTH_LONG).show());
                     return;
                 }
 
@@ -118,14 +107,14 @@ public class MainActivity extends AppCompatActivity {
                 }
                 
                 runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this, "Mod " + mode + " Aktif! Membuka Game...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Mod Aktif! Membuka Game...", Toast.LENGTH_SHORT).show();
                     
-                    // Buka Game Otomatis
-                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage(packageName);
+                    // Otomatis buka Free Fire TH
+                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.dts.freefireth");
                     if (launchIntent != null) {
                         startActivity(launchIntent);
                     } else {
-                        Toast.makeText(MainActivity.this, "Game tidak ditemukan di HP!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Free Fire tidak ditemukan di HP!", Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -146,10 +135,10 @@ public class MainActivity extends AppCompatActivity {
                         if (f.exists()) f.delete();
                     }
                 }
-                Toast.makeText(this, "File Mod Dihapus, Game Kembali Normal", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "File Mod Dihapus, Game Normal", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             Toast.makeText(this, "Gagal menghapus file: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
-                                 }
+        }
