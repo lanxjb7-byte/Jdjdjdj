@@ -5,11 +5,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.widget.Button;
 import android.widget.Switch;
 import android.widget.Toast;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -17,13 +15,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 
 import rikka.shizuku.Shizuku;
 
 public class MainActivity extends AppCompatActivity {
 
     private final String ASSET_FOLDER = "gameassetbundles";
-    // Folder tujuan FF TH
+    // Path folder tujuan FF TH (Free Fire Biasa)
     private final String TARGET_DIR = "/storage/emulated/0/Android/data/com.dts.freefireth/files/contentcache/Optional/android/gameassetbundles/";
     
     private Switch switchMod;
@@ -45,21 +44,23 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // Toggle ON / OFF
         switchMod.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isModActive = isChecked;
             if (isChecked) {
-                switchMod.setText("STATUS: ON");
-                switchMod.setTextColor(0xFF00FFCC);
+                switchMod.setText("STATUS: ON (Siap Inject)");
+                switchMod.setTextColor(0xFF00FFCC); // Cyan
             } else {
                 switchMod.setText("STATUS: OFF");
-                switchMod.setTextColor(0xFFFF0033);
+                switchMod.setTextColor(0xFFFF0033); // Merah
                 if (checkShizukuPermission()) {
                     executeShizukuCmd("rm -rf " + TARGET_DIR + "*"); // Hapus file pakai Shizuku
-                    Toast.makeText(this, "Mod dihapus, game normal", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "File Mod Dihapus, Game Normal", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+        // Tombol START
         btnFF.setOnClickListener(v -> {
             if (!isModActive) {
                 Toast.makeText(this, "Aktifkan Switch ON dulu!", Toast.LENGTH_SHORT).show();
@@ -77,18 +78,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void injectFiles() {
-        Toast.makeText(this, "Mengekstrak file ke HP...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Mengekstrak file mod...", Toast.LENGTH_SHORT).show();
         
         new Thread(() -> {
             try {
-                // 1. Ekstrak file dari dalam APK ke folder cache aplikasi kita sendiri
-                // (Kita nggak bisa langsung nulis ke folder FF tanpa Shizuku)
+                // 1. Ekstrak file dari dalam APK ke folder cache sementara
                 File cacheDir = new File(getExternalFilesDir(null), "mod_temp");
                 if (!cacheDir.exists()) cacheDir.mkdirs();
 
                 String[] files = getAssets().list(ASSET_FOLDER);
                 if (files == null || files.length == 0) {
-                    runOnUiThread(() -> Toast.makeText(this, "File di APK kosong!", Toast.LENGTH_LONG).show());
+                    runOnUiThread(() -> Toast.makeText(this, "File di folder " + ASSET_FOLDER + " kosong!", Toast.LENGTH_LONG).show());
                     return;
                 }
 
@@ -109,13 +109,21 @@ public class MainActivity extends AppCompatActivity {
                 executeShizukuCmd(cmd);
 
                 // 3. Bersihkan folder cache
-                for (File f : cacheDir.listFiles()) f.delete();
+                File[] tempFiles = cacheDir.listFiles();
+                if (tempFiles != null) {
+                    for (File f : tempFiles) f.delete();
+                }
                 cacheDir.delete();
 
+                // 4. Buka Game
                 runOnUiThread(() -> {
                     Toast.makeText(MainActivity.this, "Mod Aktif! Membuka Game...", Toast.LENGTH_SHORT).show();
                     Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.dts.freefireth");
-                    if (launchIntent != null) startActivity(launchIntent);
+                    if (launchIntent != null) {
+                        startActivity(launchIntent);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Game Free Fire tidak ditemukan!", Toast.LENGTH_LONG).show();
+                    }
                 });
 
             } catch (Exception e) {
@@ -125,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ==========================================
-    // BAGIAN SHIZUKU
+    // BAGIAN SHIZUKU (DIPERBAIKI)
     // ==========================================
 
     private boolean checkShizukuPermission() {
@@ -139,28 +147,33 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         if (Shizuku.shouldShowRequestPermissionRationale()) {
-            Toast.makeText(this, "Izin Shizuku ditolak permanen. Cek aplikasi Shizuku.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Izin Shizuku ditolak permanen. Buka aplikasi Shizuku.", Toast.LENGTH_LONG).show();
         } else {
             Shizuku.requestPermission(SHIZUKU_CODE);
         }
     }
 
-    // Fungsi buat ngejalanin perintah Shell lewat Shizuku
+    // Fungsi buat ngejalanin perintah Shell lewat Shizuku pakai Java Reflection
     private void executeShizukuCmd(String command) {
         try {
-            // newProcess itu fungsi Shizuku buat jalanin shell (bukan root)
-            Process process = Shizuku.newProcess(new String[]{"sh", "-c", command}, null, null);
-            process.waitFor();
+            // Trik Reflection buat nembus method private Shizuku.newProcess
+            Method method = Shizuku.class.getDeclaredMethod("newProcess", String[].class, String[].class, String.class);
+            method.setAccessible(true);
+            
+            // Jalanin perintah shell-nya
+            Process process = (Process) method.invoke(null, new String[]{"sh", "-c", command}, null, null);
+            process.waitFor(); // Tunggu proses copy selesai
+            
         } catch (Exception e) {
             runOnUiThread(() -> Toast.makeText(this, "Shizuku CMD Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
         }
     }
 
-    // Listener buat nangkep hasil izin dari Shizuku
+    // Listener buat nangkep pop-up izin dari Shizuku
     private final Shizuku.OnRequestPermissionResultListener REQUEST_PERMISSION_LISTENER = (requestCode, grantResult) -> {
         if (requestCode == SHIZUKU_CODE) {
             if (grantResult == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Shizuku Diizinkan! Klik START lagi.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Shizuku Diizinkan! Silakan klik START lagi.", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Izin Shizuku ditolak!", Toast.LENGTH_SHORT).show();
             }
@@ -170,12 +183,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // Daftarin listener pas aplikasi dibuka
         Shizuku.addRequestPermissionResultListener(REQUEST_PERMISSION_LISTENER);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        // Hapus listener pas aplikasi di-minimize
         Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_LISTENER);
     }
-                    }
+                                              }
