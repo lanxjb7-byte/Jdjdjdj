@@ -33,7 +33,7 @@
         android:id="@+id/switchMod"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OFF"
+        android:text="STATUS: OFF"
         android:textColor="#FF0033"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -43,11 +43,10 @@
         android:id="@+id/btnFF"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="com.dts.freefireth"
+        android:text="START FREEFIRETH"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:backgroundTint="#1A1A1A"
-        android:layout_marginBottom="16dp"/>
+        android:backgroundTint="#1A1A1A"/>
 
 </LinearLayout>
