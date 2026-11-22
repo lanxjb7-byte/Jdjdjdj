@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
             "/Android/data/com.dts.freefireth/files/contentcache/Optional/android/gameassetbundles/";
             
     // Nama folder di dalam APK lo
-    private final String ASSET_FOLDER = "gameassetbundlesl";
+    private final String ASSET_FOLDER = "gameassetbundles";
 
     private Switch switchMod;
     private boolean isModActive = false;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         switchMod.setOnCheckedChangeListener((buttonView, isChecked) -> {
             isModActive = isChecked;
             if (isChecked) {
-                switchMod.setText("STATUS: ON (Siap Inject)");
+                switchMod.setText("STATUS: ON");
                 switchMod.setTextColor(0xFF00FFCC); // Cyan
             } else {
                 switchMod.setText("STATUS: OFF");
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void injectFiles(String mode, String packageName) {
-        Toast.makeText(this, "Mengekstrak file mod...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Loading Lixxzy Lite...", Toast.LENGTH_SHORT).show();
         
         // Pindah ke background thread biar UI gak freeze
         new Thread(() -> {
