@@ -21,9 +21,11 @@ import rikka.shizuku.Shizuku;
 
 public class MainActivity extends AppCompatActivity {
 
+    // KARENA FOLDER DI REPO LO NAMANYA "gameassetbundles", KITA PAKAI INI
     private final String ASSET_FOLDER = "gameassetbundles";
-    // Path folder tujuan FF TH
-    private final String TARGET_DIR = "/storage/emulated/0/Android/data/com.dts.freefireth/files/contentcache/Optional/android/gameassetbundles/";
+    
+    // TAPI TUJUANNYA TETAP KE FOLDER FREE FIRE MAX
+    private final String TARGET_DIR = "/storage/emulated/0/Android/data/com.dts.freefiremax/files/contentcache/Optional/android/gameassetbundles/";
     
     private Switch switchMod;
     private boolean isModActive = false;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         switchMod = findViewById(R.id.switchMod);
-        Button btnFF = findViewById(R.id.btnFF);
+        Button btnFFMax = findViewById(R.id.btnFFMax); // ID tombol khusus MAX
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -53,12 +55,13 @@ public class MainActivity extends AppCompatActivity {
                 switchMod.setText("STATUS: OFF");
                 switchMod.setTextColor(0xFFFF0033); 
                 if (checkShizukuPermission()) {
-                    removeFiles(); // Panggil fungsi hapus yang aman
+                    removeFiles(); 
                 }
             }
         });
 
-        btnFF.setOnClickListener(v -> {
+        // Tombol START FF MAX
+        btnFFMax.setOnClickListener(v -> {
             if (!isModActive) {
                 Toast.makeText(this, "Aktifkan Switch ON dulu!", Toast.LENGTH_SHORT).show();
                 return;
@@ -72,11 +75,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void injectFiles() {
-        Toast.makeText(this, "Mengekstrak file mod...", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Mengekstrak file mod MAX...", Toast.LENGTH_SHORT).show();
         
         new Thread(() -> {
             try {
-                File cacheDir = new File(getExternalFilesDir(null), "mod_temp");
+                File cacheDir = new File(getExternalFilesDir(null), "mod_temp_max");
                 if (!cacheDir.exists()) cacheDir.mkdirs();
 
                 String[] files = getAssets().list(ASSET_FOLDER);
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                     out.close();
                 }
 
-                // Pindah dari Cache ke Folder FF pakai Shizuku
+                // Pindah dari Cache ke Folder FF MAX pakai Shizuku
                 String cmd = "mkdir -p " + TARGET_DIR + " && cp -r " + cacheDir.getAbsolutePath() + "/* " + TARGET_DIR;
                 executeShizukuCmd(cmd);
 
@@ -110,9 +113,13 @@ public class MainActivity extends AppCompatActivity {
                 cacheDir.delete();
 
                 runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this, "Mod Aktif! Membuka Game...", Toast.LENGTH_SHORT).show();
-                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.dts.freefireth");
-                    if (launchIntent != null) startActivity(launchIntent);
+                    Toast.makeText(MainActivity.this, "Mod MAX Aktif! Membuka Game...", Toast.LENGTH_SHORT).show();
+                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage("com.dts.freefiremax");
+                    if (launchIntent != null) {
+                        startActivity(launchIntent);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Free Fire MAX tidak ditemukan!", Toast.LENGTH_LONG).show();
+                    }
                 });
 
             } catch (Exception e) {
@@ -130,11 +137,10 @@ public class MainActivity extends AppCompatActivity {
             if (files != null && files.length > 0) {
                 StringBuilder cmd = new StringBuilder();
                 for (String file : files) {
-                    // Perintah "rm -f" cuma ngehapus file spesifik, bukan semua folder
                     cmd.append("rm -f ").append(TARGET_DIR).append(file).append("; ");
                 }
                 executeShizukuCmd(cmd.toString());
-                Toast.makeText(this, "File Mod Dihapus, Game Asli Tetap Aman", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "File Mod MAX Dihapus, Game Asli Aman", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             Toast.makeText(this, "Gagal hapus: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -194,4 +200,4 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
         Shizuku.removeRequestPermissionResultListener(REQUEST_PERMISSION_LISTENER);
     }
-                        }
+        }
