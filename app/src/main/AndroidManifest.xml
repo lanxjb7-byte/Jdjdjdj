@@ -8,8 +8,8 @@
     <queries>
         <!-- Package Shizuku -->
         <package android:name="moe.shizuku.privileged.api" />
-        <!-- Package Free Fire -->
-        <package android:name="com.dts.freefireth" />
+        <!-- Package Free Fire MAX -->
+        <package android:name="com.dts.freefiremax" />
     </queries>
 
     <application
@@ -28,7 +28,6 @@
             </intent-filter>
         </activity>
 
-        <!-- PROVIDER SHIZUKU (WAJIB) -->
         <provider
             android:name="rikka.shizuku.ShizukuProvider"
             android:authorities="${applicationId}.shizuku"
