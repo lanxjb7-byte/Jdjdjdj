@@ -40,10 +40,10 @@
         android:layout_marginBottom="40dp"/>
 
     <Button
-        android:id="@+id/btnFF"
+        android:id="@+id/btnFFMax"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="START FREEFIRETH"
+        android:text="START FREEFIREMAX"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
